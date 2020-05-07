@@ -210,7 +210,7 @@ public class Gramatica{
 				if(exists == -1){
 					toVisit.addLast(result);
 					states.addLast(result);
-					exists = states.size();
+					exists = states.size()-1;
 				}
 				thisTransitions[pos] = exists;
 				pos++;
