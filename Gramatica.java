@@ -48,9 +48,9 @@ public class Gramatica{
 			{
 				while(cuerdas.hasNextLine()){
 					if(afn.accept(cuerdas.nextLine())){
-						file.write("aceptada");
+						file.write("aceptada\n");
 					} else {
-						file.write("rechazada");
+						file.write("rechazada\n");
 					}
 				}	
 			} catch (Exception e){}
@@ -191,18 +191,22 @@ public class Gramatica{
 		LinkedList<int[]> states = new LinkedList<int[]>();
 		int[] first = {1};
 		first = removeDuplicates(objAFN.getTransition(first,'#'));
-		System.out.println(Arrays.toString(first));
+		//System.out.println(Arrays.toString(first));
 		states.add(first);
 		LinkedList<int[]> transitions = new LinkedList<int[]>();
 		LinkedList<int[]> toVisit = new LinkedList<int[]>();
 		toVisit.add(first);
+
 		while(!toVisit.isEmpty()){
 			int[] thisTransitions = new int[alphabet.length];
 			int pos = 0;
 			for(String s: alphabet){
 				int[] result = removeDuplicates(objAFN.getTransition(toVisit.getFirst(),s.charAt(0)));
 				result = removeDuplicates(objAFN.getTransition(result,'#'));
+				Arrays.sort(result);
+				
 				int exists = findElement(states,result);
+				//System.out.println(Arrays.toString(result)+exists+Arrays.toString(states.get(0)));
 				if(exists == -1){
 					toVisit.addLast(result);
 					states.addLast(result);
@@ -211,8 +215,11 @@ public class Gramatica{
 				thisTransitions[pos] = exists;
 				pos++;
 			}
+			
 			transitions.addLast(thisTransitions);
+
 			toVisit.removeFirst();
+
 		}
 
 		String resp = "";
@@ -244,7 +251,7 @@ public class Gramatica{
 		resp+="\n";
 		for(int j = 0; j < alphabet.length; j++){
 			for(int i = 0 ; i < transitions.size() -1; i++){
-				resp+=Integer.toString(transitions.get(i)[j]);
+				resp+=Integer.toString(transitions.get(i)[j])+",";
 			}
 			resp += Integer.toString(transitions.get(transitions.size()-1)[j]);
 			resp+="\n";
@@ -261,11 +268,12 @@ public class Gramatica{
 
 	public static int findElement(LinkedList<int[]> list,int[] object){
 		int pos = 0;
+		list:
 		for(int[] i : list){
 			if(i.length==object.length){
 				for(int j = 0; j < object.length; j++){
 					if(i[j]!=object[j])
-						break;
+						continue list;
 				}
 				return pos;
 			}
