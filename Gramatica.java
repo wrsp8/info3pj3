@@ -190,13 +190,15 @@ public class Gramatica{
 		AFN objAFN = new AFN(afn);
 		LinkedList<int[]> states = new LinkedList<int[]>();
 		int[] first = {1};
+		int[] errorState = new int[0];
 		first = removeDuplicates(objAFN.getTransition(first,'#'));
 		//System.out.println(Arrays.toString(first));
-		states.add(first);
+		states.add(errorState);
+		states.addLast(first);
 		LinkedList<int[]> transitions = new LinkedList<int[]>();
 		LinkedList<int[]> toVisit = new LinkedList<int[]>();
 		toVisit.add(first);
-
+		transitions.add(new int[alphabet.length]);
 		while(!toVisit.isEmpty()){
 			int[] thisTransitions = new int[alphabet.length];
 			int pos = 0;
@@ -234,10 +236,11 @@ public class Gramatica{
 		LinkedList<Integer> finalAFD = new LinkedList<Integer>();
 		int pos = 0;
 		for(int[] i : states){
+			loop:
 			for(int j = 0; j < i.length; j++){
 				if(AFNFinalState == i[j]){
 					finalAFD.add(pos);
-					break;
+					break loop;
 				}
 			}
 			pos++;
