@@ -9,8 +9,8 @@ public class Gramatica{
 		String executionMode;
 		String saveFile;
 		String ropes;
-		if (args.length < 3) 
-		System.exit(0);
+		//if (args.length < 3)
+		//System.exit(0);
 		gramatica = args[0];
 		executionMode = args[1];
 		saveFile = args[2];
@@ -23,7 +23,10 @@ public class Gramatica{
 		Scanner scan = new Scanner("");
 		try {
 			scan = new Scanner(new File(gramatica));
-		}catch(Exception e){}
+		}catch(Exception e){
+			System.out.println("Archivo " + gramatica + " no existe");
+			//System.exit(0);
+		}
 		states = scan.nextLine().split(",");
 		alphabet = scan.nextLine().split(",");
 		initState = scan.nextLine();
@@ -33,8 +36,8 @@ public class Gramatica{
 		scan.close();
 
 		if (executionMode.equals("-check")) {
-			if (args.length < 4) 
-			System.exit(0);
+			//if (args.length < 4)
+			//System.exit(0);
 			ropes = args[3];
 			//metodo para evaluar cuerdas
 			AFN afn = new AFN(GLDtoAFN(states, alphabet, initState, transitions));
@@ -42,7 +45,7 @@ public class Gramatica{
 			try {
 				cuerdas = new Scanner(new File(ropes));
 			}catch(Exception e){}
-			
+
 			FileWriter file = new FileWriter(saveFile);;
 			try
 			{
@@ -52,7 +55,7 @@ public class Gramatica{
 					} else {
 						file.write("rechazada\n");
 					}
-				}	
+				}
 			} catch (Exception e){}
 			file.close();
 			cuerdas.close();
@@ -67,7 +70,7 @@ public class Gramatica{
 				//metodo para generar el afn
 				String answer =GLDtoAFN(states, alphabet, initState,transitions);
 				AFNFile(answer, saveFile);
-				System.exit(0);
+				//System.exit(0);
 			}
 		}
 
@@ -93,7 +96,7 @@ public class Gramatica{
 		int currentState = symbols.length;
 		for(String s: transitions){
 			int len = s.length();
-			if(findPos(symbols,s.charAt(len-1))==-1){ // Caso que termine en simboloTerminal 
+			if(findPos(symbols,s.charAt(len-1))==-1){ // Caso que termine en simboloTerminal
 				int initialState = findPos(symbols,s.charAt(0))+1;
 				for(int i=3; i<len-1;i++){
 					if(mat[findPos(endSymbols,s.charAt(i))+1][initialState]==null){
@@ -127,7 +130,7 @@ public class Gramatica{
 				}
 			}
 		}
-			
+
 		for(int i =0 ; i < states; i++ ){
 			for(int j = 0; j < mat.length; j++ ){
 				if(mat[j][i]==null){
@@ -157,7 +160,7 @@ public class Gramatica{
 
 		//System.out.println(Arrays.deepToString(mat));
 		return resp;
-	}	
+	}
 
 	public static int findPos(String[] arr, char c){
 		String s = Character.toString(c);
@@ -170,7 +173,7 @@ public class Gramatica{
 	}
 
 	public static void AFNFile(String afn, String saveFile){
-		
+
 		try{
 			File file = new File(saveFile);
 			if (!file.exists()) {
@@ -183,7 +186,7 @@ public class Gramatica{
 		} catch (Exception e){
 
 		}
-	
+
 	}
 
 	public static String AFNtoAFD(String afn, String[] alphabet){
@@ -206,7 +209,7 @@ public class Gramatica{
 				int[] result = removeDuplicates(objAFN.getTransition(toVisit.getFirst(),s.charAt(0)));
 				result = removeDuplicates(objAFN.getTransition(result,'#'));
 				Arrays.sort(result);
-				
+
 				int exists = findElement(states,result);
 				//System.out.println(Arrays.toString(result)+exists+Arrays.toString(states.get(0)));
 				if(exists == -1){
@@ -217,7 +220,7 @@ public class Gramatica{
 				thisTransitions[pos] = exists;
 				pos++;
 			}
-			
+
 			transitions.addLast(thisTransitions);
 
 			toVisit.removeFirst();
@@ -259,7 +262,7 @@ public class Gramatica{
 			resp += Integer.toString(transitions.get(transitions.size()-1)[j]);
 			resp+="\n";
 		}
-		
+
 		//System.out.println(resp);
 		return resp;
 
