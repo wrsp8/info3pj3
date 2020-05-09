@@ -93,18 +93,22 @@ public class Gramatica{
 		for(int i =0 ; i < states; i++ ){
 			mat[0][i] = Integer.toString(i);
 		}
-		int currentState = symbols.length;
+		int currentState = symbols.length+1;
 		for(String s: transitions){
 			int len = s.length();
 			if(findPos(symbols,s.charAt(len-1))==-1){ // Caso que termine en simboloTerminal
 				int initialState = findPos(symbols,s.charAt(0))+1;
 				for(int i=3; i<len-1;i++){
 					if(mat[findPos(endSymbols,s.charAt(i))+1][initialState]==null){
-						mat[findPos(endSymbols,s.charAt(i))+1][initialState] = Integer.toString(currentState++);
+						
+						mat[findPos(endSymbols,s.charAt(i))+1][initialState] = Integer.toString(currentState);
 						initialState = currentState;
+						currentState++;
 					} else {
-						mat[findPos(endSymbols,s.charAt(i))+1][initialState] += ";"+Integer.toString(currentState++);
+						
+						mat[findPos(endSymbols,s.charAt(i))+1][initialState] += ";"+Integer.toString(currentState);
 						initialState = currentState;
+						currentState++;
 					}
 				}
 				if(mat[findPos(endSymbols,s.charAt(len-1))+1][initialState]==null){
@@ -116,11 +120,15 @@ public class Gramatica{
 				int initialState = findPos(symbols,s.charAt(0))+1;
 				for(int i=3; i<len-2;i++){
 					if(mat[findPos(endSymbols,s.charAt(i))+1][initialState]==null){
-						mat[findPos(endSymbols,s.charAt(i))+1][initialState] = Integer.toString(currentState++);
+						
+						mat[findPos(endSymbols,s.charAt(i))+1][initialState] = Integer.toString(currentState);
 						initialState = currentState;
+						currentState++;
 					} else {
-						mat[findPos(endSymbols,s.charAt(i))+1][initialState] += ";"+Integer.toString(currentState++);
+						
+						mat[findPos(endSymbols,s.charAt(i))+1][initialState] += ";"+Integer.toString(currentState);
 						initialState = currentState;
+						currentState++;
 					}
 				}
 				if(mat[findPos(endSymbols,s.charAt(len-2))+1][initialState]==null){
@@ -193,7 +201,7 @@ public class Gramatica{
 		AFN objAFN = new AFN(afn);
 		LinkedList<int[]> states = new LinkedList<int[]>();
 		int[] first = {1};
-		int[] errorState = new int[0];
+		int[] errorState = {0};
 		first = removeDuplicates(objAFN.getTransition(first,'#'));
 		//System.out.println(Arrays.toString(first));
 		states.add(errorState);
@@ -211,7 +219,7 @@ public class Gramatica{
 				Arrays.sort(result);
 
 				int exists = findElement(states,result);
-				//System.out.println(Arrays.toString(result)+exists+Arrays.toString(states.get(0)));
+				//System.out.println(Arrays.toString(result)+exists+Arrays.toString(states.get(1)));
 				if(exists == -1){
 					toVisit.addLast(result);
 					states.addLast(result);
@@ -236,9 +244,11 @@ public class Gramatica{
 		resp+=Integer.toString(transitions.size());
 		resp+="\n";
 		int AFNFinalState = objAFN.finalStates[0];
+		//System.out.println("FINAL STATE"+AFNFinalState);
 		LinkedList<Integer> finalAFD = new LinkedList<Integer>();
 		int pos = 0;
 		for(int[] i : states){
+			//System.out.println("ESTADOS"+Arrays.toString(i));
 			loop:
 			for(int j = 0; j < i.length; j++){
 				if(AFNFinalState == i[j]){
@@ -248,12 +258,13 @@ public class Gramatica{
 			}
 			pos++;
 		}
-
-		int[] arrayFinal = finalAFD.stream().mapToInt(i->i).toArray();;
+		
+		//System.out.println("FINAL STATE NEW"+finalAFD.toString());
+		int[] arrayFinal = finalAFD.stream().mapToInt(i->i).toArray();
 		for(int i = 0; i < arrayFinal.length -1; i++){
 			resp+=Integer.toString(arrayFinal[i])+",";
 		}
-		resp+=Integer.toString(arrayFinal.length -1);
+		resp+=Integer.toString(arrayFinal[arrayFinal.length -1]);
 		resp+="\n";
 		for(int j = 0; j < alphabet.length; j++){
 			for(int i = 0 ; i < transitions.size() -1; i++){
@@ -274,12 +285,14 @@ public class Gramatica{
 
 	public static int findElement(LinkedList<int[]> list,int[] object){
 		int pos = 0;
-		list:
+		listLabel:
 		for(int[] i : list){
 			if(i.length==object.length){
 				for(int j = 0; j < object.length; j++){
-					if(i[j]!=object[j])
-						continue list;
+					if(i[j]!=object[j]) {
+						pos++;
+						continue listLabel;
+					}
 				}
 				return pos;
 			}
