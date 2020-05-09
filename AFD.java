@@ -20,10 +20,7 @@ public class AFD{
 	int finalStates[];
 	int[][] transitions;
 	public AFD(String path){
-		Scanner scan = new Scanner("");
-		try {
-			scan = new Scanner(new File(path));
-		}catch(Exception e){}
+		Scanner scan = new Scanner(path);
 
 			alphabet = scan.nextLine().split(",");
 			total = Integer.parseInt(scan.nextLine());

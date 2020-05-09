@@ -14,7 +14,6 @@ public class Gramatica{
 		gramatica = args[0];
 		executionMode = args[1];
 		saveFile = args[2];
-		//System.out.println("Modo de ejecucion " + executionMode);
 
 		String[] states;
 		String[] alphabet;
@@ -64,6 +63,7 @@ public class Gramatica{
 				//metodo para generar el afd
 				String answer =GLDtoAFN(states, alphabet, initState,transitions);
 				answer = AFNtoAFD(answer,alphabet);
+				//answer = AFDmin(answer);
 				AFNFile(answer, saveFile);
 
 			} else {
@@ -164,9 +164,7 @@ public class Gramatica{
 			resp += mat[i][mat[i].length-1];
 			resp+="\n";
 		}
-		//System.out.println(resp);
 
-		//System.out.println(Arrays.deepToString(mat));
 		return resp;
 	}
 
@@ -203,7 +201,6 @@ public class Gramatica{
 		int[] first = {1};
 		int[] errorState = {0};
 		first = removeDuplicates(objAFN.getTransition(first,'#'));
-		//System.out.println(Arrays.toString(first));
 		states.add(errorState);
 		states.addLast(first);
 		LinkedList<int[]> transitions = new LinkedList<int[]>();
@@ -219,7 +216,6 @@ public class Gramatica{
 				Arrays.sort(result);
 
 				int exists = findElement(states,result);
-				//System.out.println(Arrays.toString(result)+exists+Arrays.toString(states.get(1)));
 				if(exists == -1){
 					toVisit.addLast(result);
 					states.addLast(result);
@@ -244,11 +240,9 @@ public class Gramatica{
 		resp+=Integer.toString(transitions.size());
 		resp+="\n";
 		int AFNFinalState = objAFN.finalStates[0];
-		//System.out.println("FINAL STATE"+AFNFinalState);
 		LinkedList<Integer> finalAFD = new LinkedList<Integer>();
 		int pos = 0;
 		for(int[] i : states){
-			//System.out.println("ESTADOS"+Arrays.toString(i));
 			loop:
 			for(int j = 0; j < i.length; j++){
 				if(AFNFinalState == i[j]){
@@ -259,7 +253,6 @@ public class Gramatica{
 			pos++;
 		}
 
-		//System.out.println("FINAL STATE NEW"+finalAFD.toString());
 		int[] arrayFinal = finalAFD.stream().mapToInt(i->i).toArray();
 		for(int i = 0; i < arrayFinal.length -1; i++){
 			resp+=Integer.toString(arrayFinal[i])+",";
@@ -274,7 +267,6 @@ public class Gramatica{
 			resp+="\n";
 		}
 
-		//System.out.println(resp);
 		return resp;
 
 	}
@@ -299,6 +291,138 @@ public class Gramatica{
 			pos++;
 		}
 
+		return -1;
+	}
+
+	public static String AFDmin(String stringAFD){
+		AFD originalAFD = new AFD(stringAFD);
+		
+		LinkedList<int[]> partitions = new LinkedList<int[]>();
+		LinkedList<int[]> partitionsF = new LinkedList<int[]>();
+		partitionsF.add(originalAFD.finalStates);
+		int[] par = new int[originalAFD.total-originalAFD.finalStates.length];
+		int counter = 0;
+		for(int i = 0; i < originalAFD.total; i++){
+			if(!inArray(originalAFD.finalStates,i)){
+				par[counter++] = i;
+			}
+		}
+		partitions.add(par);
+		int prevTotalPartitions = 0;
+		int totalPartitions = partitions.size()+ partitionsF.size(); 
+		int[][] table = new int[originalAFD.total][originalAFD.alphabet.length];
+		LinkedList<int[]> tempTransitions = new LinkedList<int[]>();
+		LinkedList<int[]> tempTransitionsF =  new LinkedList<int[]>();
+		while(!(totalPartitions == prevTotalPartitions)){
+
+			tempTransitions = new LinkedList<int[]>();
+			tempTransitionsF = new LinkedList<int[]>();
+			
+			for(int i = 0; i < originalAFD.total; i++){
+				int[] transitions = new int[originalAFD.alphabet.length];
+				for(int j = 0; j < originalAFD.alphabet.length; j++){
+					transitions[j] = placeInList(partitions,partitionsF,originalAFD.getTransition(i,originalAFD.alphabet[j].charAt(0)));
+					table[i][j] = transitions[j];
+				}
+				if(!inArray(originalAFD.finalStates,i)){
+					if(findElement(tempTransitions,transitions)==-1){
+						tempTransitions.addLast(transitions);
+					}
+				} else{
+					if(findElement(tempTransitionsF,transitions)==-1){
+						tempTransitionsF.addLast(transitions);
+					}
+				}
+			}
+			LinkedList<LinkedList<Integer>> tempPartitions = new LinkedList<LinkedList<Integer>>();
+			LinkedList<LinkedList<Integer>> tempPartitionsF = new LinkedList<LinkedList<Integer>>();
+
+			for(int i = 0; i < tempTransitions.size(); i++){
+				tempPartitions.add(new LinkedList<Integer>());
+			}
+
+			for(int i = 0; i < tempTransitionsF.size(); i++){
+				tempPartitionsF.add(new LinkedList<Integer>());
+			}
+
+			for(int i = 0; i < originalAFD.total; i++){
+				if(!inArray(originalAFD.finalStates,i)){
+					tempPartitions.get(findElement(tempTransitions,table[i])).add(i);
+				} else{
+					tempPartitionsF.get(findElement(tempTransitionsF,table[i])).add(i);
+				}
+			}
+			partitions= new LinkedList<>();
+			partitionsF = new LinkedList<>();
+			for(LinkedList<Integer> i: tempPartitions){
+				partitions.addLast(i.stream().mapToInt(x->x).toArray());
+			}
+			for(LinkedList<Integer> i: tempPartitionsF){
+				partitionsF.addLast(i.stream().mapToInt(x->x).toArray());
+			}
+
+			prevTotalPartitions = totalPartitions;
+			totalPartitions = tempTransitions.size()+tempTransitionsF.size();
+			
+		}
+
+		String resp = "";
+		for(int i = 0; i< originalAFD.alphabet.length-1;i++){
+			resp+=originalAFD.alphabet[i]+",";
+		}
+		resp+=originalAFD.alphabet[originalAFD.alphabet.length-1];
+		resp+="\n";
+		resp+=Integer.toString(totalPartitions);
+		resp+="\n";
+		int[] AFDFinalState = new int[tempTransitionsF.size()];
+		int it =0;
+		for(int i = tempTransitions.size(); i < tempTransitions.size()+tempTransitionsF.size(); i++){
+			AFDFinalState[it++] = i;
+		}
+		int[] arrayFinal = AFDFinalState;
+		for(int i = 0; i < arrayFinal.length -1; i++){
+			resp+=Integer.toString(arrayFinal[i])+",";
+		}
+		resp+=Integer.toString(arrayFinal[arrayFinal.length -1]);
+		resp+="\n";
+
+		for(int j = 0; j < originalAFD.alphabet.length; j++){
+			for(int i = 0 ; i < tempTransitions.size(); i++){
+				resp+=Integer.toString(tempTransitions.get(i)[j])+",";
+			}
+			for(int i = 0 ; i < tempTransitionsF.size()-1; i++){
+				resp+=Integer.toString(tempTransitionsF.get(i)[j])+",";
+			}
+			resp += Integer.toString(tempTransitionsF.get(tempTransitionsF.size()-1)[j]);
+			resp+="\n";
+		}
+
+		return resp;
+	}
+
+	public static boolean inArray(int[] arr, int value){
+		for(int i: arr){
+			if(i == value){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static int placeInList(LinkedList<int[]> part, LinkedList<int[]> partF, int value){
+		int pos = 0;
+		for(int[] i: part){
+			if(inArray(i,value)){
+				return pos;
+			}
+			pos++;
+		}
+		for(int[] i: partF){
+			if(inArray(i,value)){
+				return pos;
+			}
+			pos++;
+		}
 		return -1;
 	}
 
