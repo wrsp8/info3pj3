@@ -51,9 +51,9 @@ public class Gramatica{
 			{
 				while(cuerdas.hasNextLine()){
 					if(afn.accept(cuerdas.nextLine())){
-						file.write("aceptada\n");
+						file.write("aceptada"+"\n");
 					} else {
-						file.write("rechazada\n");
+						file.write("rechazada"+"\n");
 					}
 				}
 			} catch (Exception e){}
@@ -100,12 +100,12 @@ public class Gramatica{
 				int initialState = findPos(symbols,s.charAt(0))+1;
 				for(int i=3; i<len-1;i++){
 					if(mat[findPos(endSymbols,s.charAt(i))+1][initialState]==null){
-						
+
 						mat[findPos(endSymbols,s.charAt(i))+1][initialState] = Integer.toString(currentState);
 						initialState = currentState;
 						currentState++;
 					} else {
-						
+
 						mat[findPos(endSymbols,s.charAt(i))+1][initialState] += ";"+Integer.toString(currentState);
 						initialState = currentState;
 						currentState++;
@@ -120,12 +120,12 @@ public class Gramatica{
 				int initialState = findPos(symbols,s.charAt(0))+1;
 				for(int i=3; i<len-2;i++){
 					if(mat[findPos(endSymbols,s.charAt(i))+1][initialState]==null){
-						
+
 						mat[findPos(endSymbols,s.charAt(i))+1][initialState] = Integer.toString(currentState);
 						initialState = currentState;
 						currentState++;
 					} else {
-						
+
 						mat[findPos(endSymbols,s.charAt(i))+1][initialState] += ";"+Integer.toString(currentState);
 						initialState = currentState;
 						currentState++;
@@ -258,7 +258,7 @@ public class Gramatica{
 			}
 			pos++;
 		}
-		
+
 		//System.out.println("FINAL STATE NEW"+finalAFD.toString());
 		int[] arrayFinal = finalAFD.stream().mapToInt(i->i).toArray();
 		for(int i = 0; i < arrayFinal.length -1; i++){
