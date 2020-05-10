@@ -63,17 +63,23 @@ public class Gramatica{
 				//metodo para generar el afd
 				String answer =GLDtoAFN(states, alphabet, initState,transitions);
 				answer = AFNtoAFD(answer,alphabet);
-				//answer = AFDmin(answer);
 				AFNFile(answer, saveFile);
 
 			} else {
+				if(executionMode.equals("-min")) {
+					//metodo para generar el afd minimo
+					String answer =GLDtoAFN(states, alphabet, initState,transitions);
+					answer = AFNtoAFD(answer,alphabet);
+					answer = AFDmin(answer);
+					AFNFile(answer, saveFile);
+				} else {
 				//metodo para generar el afn
 				String answer =GLDtoAFN(states, alphabet, initState,transitions);
 				AFNFile(answer, saveFile);
 				//System.exit(0);
+				}
 			}
 		}
-
 	}
 
 
@@ -296,7 +302,7 @@ public class Gramatica{
 
 	public static String AFDmin(String stringAFD){
 		AFD originalAFD = new AFD(stringAFD);
-		
+
 		LinkedList<int[]> partitions = new LinkedList<int[]>();
 		LinkedList<int[]> partitionsF = new LinkedList<int[]>();
 		partitionsF.add(originalAFD.finalStates);
@@ -309,7 +315,7 @@ public class Gramatica{
 		}
 		partitions.add(par);
 		int prevTotalPartitions = 0;
-		int totalPartitions = partitions.size()+ partitionsF.size(); 
+		int totalPartitions = partitions.size()+ partitionsF.size();
 		int[][] table = new int[originalAFD.total][originalAFD.alphabet.length];
 		LinkedList<int[]> tempTransitions = new LinkedList<int[]>();
 		LinkedList<int[]> tempTransitionsF =  new LinkedList<int[]>();
@@ -317,7 +323,7 @@ public class Gramatica{
 
 			tempTransitions = new LinkedList<int[]>();
 			tempTransitionsF = new LinkedList<int[]>();
-			
+
 			for(int i = 0; i < originalAFD.total; i++){
 				int[] transitions = new int[originalAFD.alphabet.length];
 				for(int j = 0; j < originalAFD.alphabet.length; j++){
@@ -363,7 +369,7 @@ public class Gramatica{
 
 			prevTotalPartitions = totalPartitions;
 			totalPartitions = tempTransitions.size()+tempTransitionsF.size();
-			
+
 		}
 
 		String resp = "";
